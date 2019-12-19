@@ -1,8 +1,9 @@
-﻿using System;
+﻿// ReSharper disable InconsistentNaming
+
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Input;
 
 namespace Cluckeys
 {
@@ -16,19 +17,19 @@ namespace Cluckeys
         // Installs a hook procedure that monitors low-level keyboard input events.
         private const int WH_KEYBOARD_LL = 13;
 
-        private const int WM_KEYDOWN = 0x100; // KEYDOWN
-        private const int WM_KEYUP = 0x101; // KEYUP
-        private const int WM_SYSKEYDOWN = 0x104; // SYSKEYDOWN
-        private const int WM_SYSKEYUP = 0x105; // SYSKEYUP
+        private const int WM_KEYDOWN = 0x100;
+        private const int WM_KEYUP = 0x101;
+        private const int WM_SYSKEYDOWN = 0x104;
+        private const int WM_SYSKEYUP = 0x105;
 
         // The keyboard hook handle.
         private int _keyboardHookHandle;
 
         private readonly Dictionary<int, int> _eventDict = new Dictionary<int, int>();
 
-        private OnKeyEvent _onKeyDownEvent;
-        private OnKeyEvent _onKeyTypeEvent;
-        private OnKeyEvent _onKeyUpEvent;
+        private OnKeyEvent? _onKeyDownEvent;
+        private OnKeyEvent? _onKeyTypeEvent;
+        private OnKeyEvent? _onKeyUpEvent;
 
         public OnKeyEvent OnKeyDownEvent
         {
@@ -59,12 +60,12 @@ namespace Cluckeys
         /// https://docs.microsoft.com/zh-cn/windows/win32/api/winuser/nf-winuser-setwindowshookexa
         /// </summary>
         /// <param name="idHook">The type of hook procedure to be installed.</param>
-        /// <param name="lpfn"></param>
+        /// <param name="lpFn"></param>
         /// <param name="hInstance"></param>
         /// <param name="threadId"></param>
         /// <returns></returns>
         [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        private static extern int SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hInstance, int threadId);
+        private static extern int SetWindowsHookEx(int idHook, HookProc lpFn, IntPtr hInstance, int threadId);
 
 
         /// <summary>
@@ -107,9 +108,12 @@ namespace Cluckeys
             if (_keyboardHookHandle != 0) return;
 
             // 安装键盘钩子 
-            var moduleName = System.Diagnostics.Process.GetCurrentProcess().MainModule?.ModuleName;
-            var moduleHandle = GetModuleHandle(moduleName);
-            _keyboardHookHandle = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, moduleHandle, 0);
+            var processModule = System.Diagnostics.Process.GetCurrentProcess().MainModule;
+            if (processModule != null)
+            {
+                var moduleHandle = GetModuleHandle(processModule.ModuleName);
+                _keyboardHookHandle = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, moduleHandle, 0);
+            }
 
             if (_keyboardHookHandle == 0)
             {
@@ -117,11 +121,16 @@ namespace Cluckeys
             }
         }
 
+        private static KeyboardEvent? GetKeyboardEvent(IntPtr lParam)
+        {
+            return (KeyboardEvent?) Marshal.PtrToStructure(lParam, typeof(KeyboardEvent));
+        }
+
         private int LowLevelKeyboardProc(int nCode, Int32 wParam, IntPtr lParam)
         {
-            if (nCode >= 0)
+            KeyboardEvent? keyboardEvent;
+            if (nCode >= 0 && (keyboardEvent = GetKeyboardEvent(lParam)) != null)
             {
-                var keyboardEvent = (KeyboardEvent) Marshal.PtrToStructure(lParam, typeof(KeyboardEvent));
                 switch (wParam)
                 {
                     case WM_KEYDOWN:
@@ -151,7 +160,7 @@ namespace Cluckeys
             if (_keyboardHookHandle == 0) return;
             if (UnhookWindowsHookEx(_keyboardHookHandle))
             {
-                throw new Exception("Unable to unhook keyboard hook: " + _keyboardHookHandle);
+                throw new Exception($"Unable to unhook keyboard hook: {_keyboardHookHandle}");
             }
 
             _keyboardHookHandle = 0;
@@ -167,6 +176,8 @@ namespace Cluckeys
         /// 键盘事件结构
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
+        [SuppressMessage("ReSharper", "NotAccessedField.Global")]
+        [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
         public class KeyboardEvent
         {
             /// <summary>
@@ -189,10 +200,10 @@ namespace Cluckeys
             /// </summary>
             public readonly int time;
 
-            /// <summary>
-            /// 额外信息
-            /// </summary>
-            public readonly int dwExtraInfo;
+            internal KeyboardEvent()
+            {
+                vkCode = scanCode = flags = time = 0;
+            }
         }
     }
 }

@@ -11,15 +11,18 @@ namespace Cluckeys
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App
     {
-        private KeyboardHook _hook = new KeyboardHook();
+        private KeyboardHook? _hook;
 
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
-            _hook.OnKeyDownEvent = OnKeyDownEvent;
-            _hook.OnKeyTypeEvent = OnKeyTypeEvent;
-            _hook.OnKeyUpEvent = OnKeyUpEvent;
+            _hook = new KeyboardHook
+            {
+                OnKeyDownEvent = OnKeyDownEvent,
+                OnKeyTypeEvent = OnKeyTypeEvent,
+                OnKeyUpEvent = OnKeyUpEvent
+            };
             try
             {
                 _hook.Start();
@@ -50,7 +53,7 @@ namespace Cluckeys
         {
             try
             {
-                _hook.Stop();
+                _hook?.Stop();
                 _hook = null;
             }
             catch (Exception exception)
