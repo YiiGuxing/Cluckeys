@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace Cluckeys
@@ -13,19 +8,11 @@ namespace Cluckeys
     /// </summary>
     public partial class App
     {
-        private KeyboardHook? _hook;
-
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
-            _hook = new KeyboardHook
-            {
-                OnKeyDownEvent = OnKeyDownEvent,
-                OnKeyTypeEvent = OnKeyTypeEvent,
-                OnKeyUpEvent = OnKeyUpEvent
-            };
             try
             {
-                _hook.Start();
+                CluckeysManager.Instance.Start();
             }
             catch (Exception exception)
             {
@@ -34,27 +21,11 @@ namespace Cluckeys
             }
         }
 
-        private void OnKeyDownEvent(KeyboardHook.KeyboardEvent e)
-        {
-            Console.WriteLine($"OnKeyDownEvent: {e.vkCode}");
-        }
-
-        private void OnKeyTypeEvent(KeyboardHook.KeyboardEvent e)
-        {
-            Console.WriteLine($"OnKeyTypeEvent: {e.vkCode}");
-        }
-
-        private void OnKeyUpEvent(KeyboardHook.KeyboardEvent e)
-        {
-            Console.WriteLine($"OnKeyUpEvent: {e.vkCode}");
-        }
-
         private void App_OnExit(object sender, ExitEventArgs e)
         {
             try
             {
-                _hook?.Stop();
-                _hook = null;
+                CluckeysManager.Instance.Stop();
             }
             catch (Exception exception)
             {
