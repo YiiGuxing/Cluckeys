@@ -10,28 +10,17 @@ namespace Cluckeys
     {
         private const int VK_BACKSPACE = 8; // Backspace
         private const int VK_DELETE = 46; // Delete
-        private const int VK_SHIFT_L = 160; // Left Shift
-        private const int VK_SHIFT_R = 161; // Right Shift
-        private const int VK_CTRL_L = 162; // Left Ctrl
-        private const int VK_CTRL_R = 163; // Right Ctrl
-        private const int VK_ALT_L = 164; // Left Alt
-        private const int VK_ALT_R = 165; // Right Alt
-
-        private const int SHIFT_MASK = 1 << 8;
-        private const int CTRL_MASK = 1 << 9;
-        private const int ALT_MASK = 1 << 10;
 
         private bool _initialized;
-        
+
         private readonly KeyboardHook _keyboardHook;
 
-        private int _modifiers;
         private int _keyPressedCount;
 
         private Sound _sound;
         private Sound _holdSound;
 
-        private SoundBuffer _defaultSound;
+        private SoundBuffer? _defaultSound;
         private readonly Dictionary<int, SoundBuffer> _sounds = new Dictionary<int, SoundBuffer>();
         private readonly Dictionary<int, SoundBuffer> _soundsIgnoreControlKey = new Dictionary<int, SoundBuffer>();
 
@@ -61,14 +50,14 @@ namespace Cluckeys
             _holdSound = new Sound(new SoundBuffer("sounds\\hold.flac")) {Loop = true};
 
             var shiftSound = new SoundBuffer("sounds\\shift.flac");
-            _soundsIgnoreControlKey[VK_SHIFT_L] = shiftSound;
-            _soundsIgnoreControlKey[VK_SHIFT_R] = shiftSound;
+            _soundsIgnoreControlKey[KeyboardHook.VK_SHIFT_L] = shiftSound;
+            _soundsIgnoreControlKey[KeyboardHook.VK_SHIFT_R] = shiftSound;
 
             var controlSound = new SoundBuffer("sounds\\control.flac");
-            _soundsIgnoreControlKey[VK_CTRL_L] = controlSound;
-            _soundsIgnoreControlKey[VK_CTRL_R] = controlSound;
-            _soundsIgnoreControlKey[VK_ALT_L] = controlSound;
-            _soundsIgnoreControlKey[VK_ALT_R] = controlSound;
+            _soundsIgnoreControlKey[KeyboardHook.VK_CTRL_L] = controlSound;
+            _soundsIgnoreControlKey[KeyboardHook.VK_CTRL_R] = controlSound;
+            _soundsIgnoreControlKey[KeyboardHook.VK_ALT_L] = controlSound;
+            _soundsIgnoreControlKey[KeyboardHook.VK_ALT_R] = controlSound;
 
             // Caps
             _soundsIgnoreControlKey[20] = controlSound;
@@ -88,7 +77,7 @@ namespace Cluckeys
             // ESC
             _soundsIgnoreControlKey[27] = new SoundBuffer("sounds\\esc.flac");
             // windows
-            _soundsIgnoreControlKey[91] = new SoundBuffer("sounds\\windows.flac");
+            _soundsIgnoreControlKey[KeyboardHook.VK_WINDOWS] = new SoundBuffer("sounds\\windows.flac");
 
             var deleteSound = new SoundBuffer("sounds\\delete.flac");
             _soundsIgnoreControlKey[VK_BACKSPACE] = deleteSound;
@@ -147,32 +136,34 @@ namespace Cluckeys
             _soundsIgnoreControlKey[110] = symbolSound;
 
             // Key Combinations
-            _sounds[SHIFT_MASK | 49] = symbolSound;
-            _sounds[SHIFT_MASK | 50] = symbolSound;
-            _sounds[SHIFT_MASK | 51] = symbolSound;
-            _sounds[SHIFT_MASK | 52] = symbolSound;
-            _sounds[SHIFT_MASK | 53] = symbolSound;
-            _sounds[SHIFT_MASK | 54] = symbolSound;
-            _sounds[SHIFT_MASK | 55] = symbolSound;
-            _sounds[SHIFT_MASK | 56] = symbolSound;
+            _sounds[KeyboardHook.SHIFT_MASK | 49] = symbolSound;
+            _sounds[KeyboardHook.SHIFT_MASK | 50] = symbolSound;
+            _sounds[KeyboardHook.SHIFT_MASK | 51] = symbolSound;
+            _sounds[KeyboardHook.SHIFT_MASK | 52] = symbolSound;
+            _sounds[KeyboardHook.SHIFT_MASK | 53] = symbolSound;
+            _sounds[KeyboardHook.SHIFT_MASK | 54] = symbolSound;
+            _sounds[KeyboardHook.SHIFT_MASK | 55] = symbolSound;
+            _sounds[KeyboardHook.SHIFT_MASK | 56] = symbolSound;
+
+            _sounds[KeyboardHook.LOCK_SHORTCUT] = new SoundBuffer("sounds\\locked.flac");
 
             var copySound = new SoundBuffer("sounds\\copy.flac");
             // Ctrl C
-            _sounds[CTRL_MASK | 67] = copySound;
+            _sounds[KeyboardHook.CTRL_MASK | 67] = copySound;
             // Ctrl Shift C
-            _sounds[CTRL_MASK | SHIFT_MASK | 67] = copySound;
+            _sounds[KeyboardHook.CTRL_MASK | KeyboardHook.SHIFT_MASK | 67] = copySound;
 
             var pasteSound = new SoundBuffer("sounds\\paste.flac");
             // Ctrl V
-            _sounds[CTRL_MASK | 86] = pasteSound;
+            _sounds[KeyboardHook.CTRL_MASK | 86] = pasteSound;
             // Ctrl Shift V
-            _sounds[CTRL_MASK | SHIFT_MASK | 86] = pasteSound;
+            _sounds[KeyboardHook.CTRL_MASK | KeyboardHook.SHIFT_MASK | 86] = pasteSound;
 
             var repentSound = new SoundBuffer("sounds\\repent.flac");
             // Ctrl Z
-            _sounds[CTRL_MASK | 90] = repentSound;
+            _sounds[KeyboardHook.CTRL_MASK | 90] = repentSound;
             // Ctrl Shift Z
-            _sounds[CTRL_MASK | SHIFT_MASK | 90] = repentSound;
+            _sounds[KeyboardHook.CTRL_MASK | KeyboardHook.SHIFT_MASK | 90] = repentSound;
 
             // Brackets
             var bracketsSound = new SoundBuffer("sounds\\brackets.flac");
@@ -182,47 +173,26 @@ namespace Cluckeys
             // ]}
             _soundsIgnoreControlKey[221] = bracketsSound;
             // (
-            _sounds[SHIFT_MASK | 57] = bracketsSound2;
+            _sounds[KeyboardHook.SHIFT_MASK | 57] = bracketsSound2;
             // )
-            _sounds[SHIFT_MASK | 48] = bracketsSound2;
+            _sounds[KeyboardHook.SHIFT_MASK | 48] = bracketsSound2;
 
             _initialized = true;
         }
-
 
         private void OnKeyDownEvent(KeyboardHook.KeyboardEvent e)
         {
             _keyPressedCount++;
 
             var vkCode = e.vkCode;
-            AddModifierIfNeed(vkCode);
-
             var soundBuffer = _soundsIgnoreControlKey.GetValueOrDefault(vkCode) ??
-                              _sounds.GetValueOrDefault(_modifiers | vkCode, _defaultSound);
+                              _sounds.GetValueOrDefault(e.code) ??
+                              _defaultSound;
             if (soundBuffer == null) return;
 
             _sound.Stop();
             _sound.SoundBuffer = soundBuffer;
             _sound.Play();
-        }
-
-        private void AddModifierIfNeed(int vkCode)
-        {
-            switch (vkCode)
-            {
-                case VK_SHIFT_L:
-                case VK_SHIFT_R:
-                    _modifiers |= SHIFT_MASK;
-                    break;
-                case VK_CTRL_L:
-                case VK_CTRL_R:
-                    _modifiers |= CTRL_MASK;
-                    break;
-                case VK_ALT_L:
-                case VK_ALT_R:
-                    _modifiers |= ALT_MASK;
-                    break;
-            }
         }
 
         private void OnKeyTypeEvent(KeyboardHook.KeyboardEvent e)
@@ -244,41 +214,24 @@ namespace Cluckeys
         private void OnKeyUpEvent(KeyboardHook.KeyboardEvent e)
         {
             _keyPressedCount--;
-            RemoveModifierIfNeed(e.vkCode);
             if (_keyPressedCount == 0)
             {
                 _holdSound.Stop();
             }
         }
 
-        private void RemoveModifierIfNeed(int vkCode)
-        {
-            switch (vkCode)
-            {
-                case VK_SHIFT_L:
-                case VK_SHIFT_R:
-                    _modifiers &= ~SHIFT_MASK;
-                    break;
-                case VK_CTRL_L:
-                case VK_CTRL_R:
-                    _modifiers &= ~CTRL_MASK;
-                    break;
-                case VK_ALT_L:
-                case VK_ALT_R:
-                    _modifiers &= ~ALT_MASK;
-                    break;
-            }
-        }
-
         public void Start()
         {
             InitializeSounds();
+            _keyPressedCount = 0;
             _keyboardHook.Start();
         }
 
         public void Stop()
         {
             _keyboardHook.Stop();
+            _holdSound.Stop();
+            _keyPressedCount = 0;
         }
 
         ~CluckeysManager()
