@@ -14,7 +14,8 @@ namespace Cluckeys
     /// </summary>
     public class KeyboardHook
     {
-        public const int VK_WINDOWS = 91; // Windows
+        public const int VK_WINDOWS_L = 91; // Left Windows
+        public const int VK_WINDOWS_R = 92; // Right Windows
         public const int VK_SHIFT_L = 160; // Left Shift
         public const int VK_SHIFT_R = 161; // Right Shift
         public const int VK_CTRL_L = 162; // Left Ctrl
@@ -212,7 +213,8 @@ namespace Cluckeys
         {
             switch (vkCode)
             {
-                case VK_WINDOWS:
+                case VK_WINDOWS_L:
+                case VK_WINDOWS_R:
                     _modifiers |= WINDOWS_MASK;
                     break;
                 case VK_SHIFT_L:
@@ -234,7 +236,8 @@ namespace Cluckeys
         {
             switch (vkCode)
             {
-                case VK_WINDOWS:
+                case VK_WINDOWS_L:
+                case VK_WINDOWS_R:
                     _modifiers &= ~WINDOWS_MASK;
                     break;
                 case VK_SHIFT_L:
@@ -307,7 +310,8 @@ namespace Cluckeys
                 {
                     return vkCode switch
                     {
-                        VK_WINDOWS => (_modifiers & ~WINDOWS_MASK),
+                        VK_WINDOWS_L => (_modifiers & ~WINDOWS_MASK),
+                        VK_WINDOWS_R => (_modifiers & ~WINDOWS_MASK),
                         VK_SHIFT_L => (_modifiers & ~SHIFT_MASK),
                         VK_SHIFT_R => (_modifiers & ~SHIFT_MASK),
                         VK_CTRL_L => (_modifiers & ~CTRL_MASK),

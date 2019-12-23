@@ -75,8 +75,11 @@ namespace Cluckeys
 
             // ESC
             _soundsIgnoreControlKey[27] = new SoundBuffer("sounds\\esc.flac");
-            // windows
-            _soundsIgnoreControlKey[KeyboardHook.VK_WINDOWS] = new SoundBuffer("sounds\\windows.flac");
+
+            // Windows
+            var windowsSound = new SoundBuffer("sounds\\windows.flac");
+            _soundsIgnoreControlKey[KeyboardHook.VK_WINDOWS_L] = windowsSound;
+            _soundsIgnoreControlKey[KeyboardHook.VK_WINDOWS_R] = windowsSound;
 
             var deleteSound = new SoundBuffer("sounds\\delete.flac");
             _soundsIgnoreControlKey[VK_BACKSPACE] = deleteSound;
