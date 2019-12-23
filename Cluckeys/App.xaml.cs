@@ -10,7 +10,7 @@ namespace Cluckeys
     public partial class App
     {
         private bool _isFirstInstance;
-        private Mutex _singletonMutex;
+        private Mutex? _singletonMutex;
 
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
@@ -28,7 +28,8 @@ namespace Cluckeys
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                MessageBox.Show("错误，无法启用Cluckeys！", "Cluckeys", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowStoppedRunningMessage(exception.Message);
+                Shutdown();
             }
         }
 
@@ -42,8 +43,6 @@ namespace Cluckeys
             if (!_isFirstInstance)
                 return;
 
-            _singletonMutex.ReleaseMutex();
-
             try
             {
                 CluckeysManager.Instance.Stop();
@@ -51,9 +50,17 @@ namespace Cluckeys
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                MessageBox.Show("错误，无法停用Cluckeys！", "Cluckeys", MessageBoxButton.OK, MessageBoxImage.Error);
-                throw;
+                ShowStoppedRunningMessage(exception.Message);
             }
+            finally
+            {
+                _singletonMutex?.ReleaseMutex();
+            }
+        }
+
+        private static void ShowStoppedRunningMessage(string message)
+        {
+            MessageBox.Show(message, "Cluckeys已停止运行", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }
