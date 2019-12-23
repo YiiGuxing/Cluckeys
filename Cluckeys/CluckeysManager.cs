@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using System.Collections.Generic;
 using SFML.Audio;
 
@@ -16,8 +17,8 @@ namespace Cluckeys
 
         private int _keyPressedCount;
 
-        private Sound? _sound;
         private Sound? _holdSound;
+        private readonly SoundPool _soundPool = new SoundPool();
 
         private SoundBuffer? _defaultSound;
         private readonly Dictionary<int, SoundBuffer> _sounds = new Dictionary<int, SoundBuffer>();
@@ -45,7 +46,6 @@ namespace Cluckeys
             if (_initialized) return;
 
             _defaultSound = new SoundBuffer("sounds\\type.flac");
-            _sound = new Sound(_defaultSound);
             _holdSound = new Sound(new SoundBuffer("sounds\\hold.flac")) {Loop = true};
 
             var shiftSound = new SoundBuffer("sounds\\shift.flac");
@@ -186,18 +186,15 @@ namespace Cluckeys
         {
             _keyPressedCount++;
 
-            if (_sound == null)
-                return;
-
             var soundBuffer = _soundsIgnoreControlKey.GetValueOrDefault(e.vkCode) ??
                               _sounds.GetValueOrDefault(e.code) ??
                               _defaultSound;
             if (soundBuffer == null)
                 return;
 
-            _sound.Stop();
-            _sound.SoundBuffer = soundBuffer;
-            _sound.Play();
+            var sound = _soundPool.GetSound();
+            sound.SoundBuffer = soundBuffer;
+            sound.Play();
         }
 
         private void OnKeyTypeEvent(KeyboardHook.KeyboardEvent e)
@@ -206,12 +203,10 @@ namespace Cluckeys
             if (vkCode == VK_BACKSPACE || vkCode == VK_DELETE)
             {
                 _holdSound?.Stop();
-                if (_sound != null)
-                {
-                    _sound.Stop();
-                    _sound.SoundBuffer = _soundsIgnoreControlKey[vkCode];
-                    _sound.Play();
-                }
+
+                var sound = _soundPool.GetSound();
+                sound.SoundBuffer = _soundsIgnoreControlKey[vkCode];
+                sound.Play();
             }
             else if (_holdSound != null && _holdSound.Status != SoundStatus.Playing)
             {
@@ -246,6 +241,69 @@ namespace Cluckeys
         ~CluckeysManager()
         {
             Stop();
+        }
+
+        private class PooledSound : Sound
+        {
+            internal long popTime;
+        }
+
+        private class SoundPool
+        {
+            private readonly int _maxPoolSize;
+            private readonly List<PooledSound> _pools;
+
+            internal SoundPool(int maxPoolSize = 5)
+            {
+                if (maxPoolSize <= 0)
+                {
+                    throw new ArgumentException("maxPoolSize must be greater than 0.");
+                }
+
+                _maxPoolSize = maxPoolSize;
+                _pools = new List<PooledSound>(Math.Min(maxPoolSize, 5));
+            }
+
+            internal Sound GetSound()
+            {
+                PooledSound? available = null;
+                PooledSound? oldest = null;
+                foreach (var pooledSound in _pools)
+                {
+                    if (pooledSound.Status == SoundStatus.Stopped)
+                    {
+                        available = pooledSound;
+                        break;
+                    }
+
+                    if (oldest == null || pooledSound.popTime < oldest.popTime)
+                    {
+                        oldest = pooledSound;
+                    }
+                }
+
+                PooledSound sound;
+                if (available != null)
+                {
+                    sound = available;
+                }
+                else if (oldest == null || _pools.Count < _maxPoolSize)
+                {
+                    sound = new PooledSound();
+                    if (_pools.Count < _maxPoolSize)
+                    {
+                        _pools.Add(sound);
+                    }
+                }
+                else
+                {
+                    oldest.Stop();
+                    sound = oldest;
+                }
+
+                sound.popTime = Environment.TickCount64;
+                return sound;
+            }
         }
     }
 }
