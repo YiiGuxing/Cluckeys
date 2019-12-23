@@ -1,6 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
 
-using System;
 using System.Collections.Generic;
 using SFML.Audio;
 
@@ -17,8 +16,8 @@ namespace Cluckeys
 
         private int _keyPressedCount;
 
-        private Sound _sound;
-        private Sound _holdSound;
+        private Sound? _sound;
+        private Sound? _holdSound;
 
         private SoundBuffer? _defaultSound;
         private readonly Dictionary<int, SoundBuffer> _sounds = new Dictionary<int, SoundBuffer>();
@@ -184,11 +183,14 @@ namespace Cluckeys
         {
             _keyPressedCount++;
 
-            var vkCode = e.vkCode;
-            var soundBuffer = _soundsIgnoreControlKey.GetValueOrDefault(vkCode) ??
+            if (_sound == null)
+                return;
+
+            var soundBuffer = _soundsIgnoreControlKey.GetValueOrDefault(e.vkCode) ??
                               _sounds.GetValueOrDefault(e.code) ??
                               _defaultSound;
-            if (soundBuffer == null) return;
+            if (soundBuffer == null)
+                return;
 
             _sound.Stop();
             _sound.SoundBuffer = soundBuffer;
@@ -200,12 +202,15 @@ namespace Cluckeys
             var vkCode = e.vkCode;
             if (vkCode == VK_BACKSPACE || vkCode == VK_DELETE)
             {
-                _holdSound.Stop();
-                _sound.Stop();
-                _sound.SoundBuffer = _soundsIgnoreControlKey[vkCode];
-                _sound.Play();
+                _holdSound?.Stop();
+                if (_sound != null)
+                {
+                    _sound.Stop();
+                    _sound.SoundBuffer = _soundsIgnoreControlKey[vkCode];
+                    _sound.Play();
+                }
             }
-            else if (_holdSound.Status != SoundStatus.Playing)
+            else if (_holdSound != null && _holdSound.Status != SoundStatus.Playing)
             {
                 _holdSound.Play();
             }
@@ -214,10 +219,11 @@ namespace Cluckeys
         private void OnKeyUpEvent(KeyboardHook.KeyboardEvent e)
         {
             _keyPressedCount--;
-            if (_keyPressedCount == 0)
-            {
-                _holdSound.Stop();
-            }
+            if (_keyPressedCount > 0)
+                return;
+
+            _keyPressedCount = 0;
+            _holdSound?.Stop();
         }
 
         public void Start()
@@ -230,7 +236,7 @@ namespace Cluckeys
         public void Stop()
         {
             _keyboardHook.Stop();
-            _holdSound.Stop();
+            _holdSound?.Stop();
             _keyPressedCount = 0;
         }
 
