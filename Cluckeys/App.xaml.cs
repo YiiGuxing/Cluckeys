@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Windows;
 
 namespace Cluckeys
@@ -8,8 +9,18 @@ namespace Cluckeys
     /// </summary>
     public partial class App
     {
+        private bool _isFirstInstance;
+        private Mutex _singletonMutex;
+
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
+            EnsureSingleton();
+            if (!_isFirstInstance)
+            {
+                Shutdown();
+                return;
+            }
+
             try
             {
                 CluckeysManager.Instance.Start();
@@ -21,8 +32,18 @@ namespace Cluckeys
             }
         }
 
+        private void EnsureSingleton()
+        {
+            _singletonMutex = new Mutex(true, "Cluckeys.App.Mutex", out _isFirstInstance);
+        }
+
         private void App_OnExit(object sender, ExitEventArgs e)
         {
+            if (!_isFirstInstance)
+                return;
+
+            _singletonMutex.ReleaseMutex();
+
             try
             {
                 CluckeysManager.Instance.Stop();
