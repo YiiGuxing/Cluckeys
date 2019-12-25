@@ -45,14 +45,14 @@ namespace Cluckeys
         {
             if (_initialized) return;
 
-            _defaultSound = new SoundBuffer(Resource.type);
-            _holdSound = new Sound(new SoundBuffer(Resource.hold)) {Loop = true};
+            _defaultSound = new SoundBuffer(Resources.type);
+            _holdSound = new Sound(new SoundBuffer(Resources.hold)) {Loop = true};
 
-            var shiftSound = new SoundBuffer(Resource.shift);
+            var shiftSound = new SoundBuffer(Resources.shift);
             _soundsIgnoreControlKey[KeyboardHook.VK_SHIFT_L] = shiftSound;
             _soundsIgnoreControlKey[KeyboardHook.VK_SHIFT_R] = shiftSound;
 
-            var controlSound = new SoundBuffer(Resource.control);
+            var controlSound = new SoundBuffer(Resources.control);
             _soundsIgnoreControlKey[KeyboardHook.VK_CTRL_L] = controlSound;
             _soundsIgnoreControlKey[KeyboardHook.VK_CTRL_R] = controlSound;
             _soundsIgnoreControlKey[KeyboardHook.VK_ALT_L] = controlSound;
@@ -67,25 +67,25 @@ namespace Cluckeys
             // Num
             _soundsIgnoreControlKey[144] = controlSound;
 
-            var enterSound = new SoundBuffer(Resource.enter);
+            var enterSound = new SoundBuffer(Resources.enter);
             // Tab    
             _soundsIgnoreControlKey[9] = enterSound;
             // Enter    
             _soundsIgnoreControlKey[13] = enterSound;
 
             // ESC
-            _soundsIgnoreControlKey[27] = new SoundBuffer(Resource.esc);
+            _soundsIgnoreControlKey[27] = new SoundBuffer(Resources.esc);
 
             // Windows
-            var windowsSound = new SoundBuffer(Resource.windows);
+            var windowsSound = new SoundBuffer(Resources.windows);
             _soundsIgnoreControlKey[KeyboardHook.VK_WINDOWS_L] = windowsSound;
             _soundsIgnoreControlKey[KeyboardHook.VK_WINDOWS_R] = windowsSound;
 
-            var deleteSound = new SoundBuffer(Resource.delete);
+            var deleteSound = new SoundBuffer(Resources.delete);
             _soundsIgnoreControlKey[VK_BACKSPACE] = deleteSound;
             _soundsIgnoreControlKey[VK_DELETE] = deleteSound;
 
-            var forwardSound = new SoundBuffer(Resource.forward);
+            var forwardSound = new SoundBuffer(Resources.forward);
             // PageUp
             _soundsIgnoreControlKey[33] = forwardSound;
             // PageDown
@@ -97,15 +97,15 @@ namespace Cluckeys
 
             // Arrows
             // Left
-            _soundsIgnoreControlKey[37] = new SoundBuffer(Resource.left);
+            _soundsIgnoreControlKey[37] = new SoundBuffer(Resources.left);
             // Up
-            _soundsIgnoreControlKey[38] = new SoundBuffer(Resource.up);
+            _soundsIgnoreControlKey[38] = new SoundBuffer(Resources.up);
             // Right
-            _soundsIgnoreControlKey[39] = new SoundBuffer(Resource.right);
+            _soundsIgnoreControlKey[39] = new SoundBuffer(Resources.right);
             // Down
-            _soundsIgnoreControlKey[40] = new SoundBuffer(Resource.down);
+            _soundsIgnoreControlKey[40] = new SoundBuffer(Resources.down);
 
-            var symbolSound = new SoundBuffer(Resource.symbol);
+            var symbolSound = new SoundBuffer(Resources.symbol);
             // Space
             _soundsIgnoreControlKey[32] = symbolSound;
             // `~
@@ -147,29 +147,29 @@ namespace Cluckeys
             _sounds[KeyboardHook.SHIFT_MASK | 55] = symbolSound;
             _sounds[KeyboardHook.SHIFT_MASK | 56] = symbolSound;
 
-            _sounds[KeyboardHook.LOCK_SHORTCUT] = new SoundBuffer(Resource.locked);
+            _sounds[KeyboardHook.LOCK_SHORTCUT] = new SoundBuffer(Resources.locked);
 
-            var copySound = new SoundBuffer(Resource.copy);
+            var copySound = new SoundBuffer(Resources.copy);
             // Ctrl C
             _sounds[KeyboardHook.CTRL_MASK | 67] = copySound;
             // Ctrl Shift C
             _sounds[KeyboardHook.CTRL_MASK | KeyboardHook.SHIFT_MASK | 67] = copySound;
 
-            var pasteSound = new SoundBuffer(Resource.paste);
+            var pasteSound = new SoundBuffer(Resources.paste);
             // Ctrl V
             _sounds[KeyboardHook.CTRL_MASK | 86] = pasteSound;
             // Ctrl Shift V
             _sounds[KeyboardHook.CTRL_MASK | KeyboardHook.SHIFT_MASK | 86] = pasteSound;
 
-            var repentSound = new SoundBuffer(Resource.repent);
+            var repentSound = new SoundBuffer(Resources.repent);
             // Ctrl Z
             _sounds[KeyboardHook.CTRL_MASK | 90] = repentSound;
             // Ctrl Shift Z
             _sounds[KeyboardHook.CTRL_MASK | KeyboardHook.SHIFT_MASK | 90] = repentSound;
 
             // Brackets
-            var bracketsSound = new SoundBuffer(Resource.brackets);
-            var bracketsSound2 = new SoundBuffer(Resource.brackets2);
+            var bracketsSound = new SoundBuffer(Resources.brackets);
+            var bracketsSound2 = new SoundBuffer(Resources.brackets2);
             // [{
             _soundsIgnoreControlKey[219] = bracketsSound;
             // ]}
