@@ -24,7 +24,13 @@ namespace Cluckeys
         private readonly Dictionary<int, SoundBuffer> _sounds = new Dictionary<int, SoundBuffer>();
         private readonly Dictionary<int, SoundBuffer> _soundsIgnoreControlKey = new Dictionary<int, SoundBuffer>();
 
-        public static CluckeysManager Instance { get; }
+        private delegate void Command();
+
+        private readonly Dictionary<int, Command> _commands = new Dictionary<int, Command>();
+
+        private bool IsEnabled { get; set; } = true;
+
+        internal static CluckeysManager Instance { get; }
 
         static CluckeysManager()
         {
@@ -39,6 +45,9 @@ namespace Cluckeys
                 OnKeyTypeEvent = OnKeyTypeEvent,
                 OnKeyUpEvent = OnKeyUpEvent
             };
+
+            // Windows + F12
+            _commands[KeyboardHook.WINDOWS_MASK | 123] = () => IsEnabled = !IsEnabled;
         }
 
         private void InitializeSounds()
@@ -186,6 +195,11 @@ namespace Cluckeys
         {
             _keyPressedCount++;
 
+            var isEnabled = IsEnabled;
+            _commands.GetValueOrDefault(e.code)?.Invoke();
+            if (!isEnabled && !IsEnabled)
+                return;
+
             var soundBuffer = _soundsIgnoreControlKey.GetValueOrDefault(e.vkCode) ??
                               _sounds.GetValueOrDefault(e.code) ??
                               _defaultSound;
@@ -199,6 +213,9 @@ namespace Cluckeys
 
         private void OnKeyTypeEvent(KeyboardHook.KeyboardEvent e)
         {
+            if (!IsEnabled)
+                return;
+
             var vkCode = e.vkCode;
             if (vkCode == VK_BACKSPACE || vkCode == VK_DELETE)
             {
@@ -221,7 +238,10 @@ namespace Cluckeys
                 return;
 
             _keyPressedCount = 0;
-            _holdSound?.Stop();
+            if (_holdSound != null && _holdSound.Status == SoundStatus.Playing)
+            {
+                _holdSound.Stop();
+            }
         }
 
         public void Start()
