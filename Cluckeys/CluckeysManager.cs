@@ -238,10 +238,7 @@ namespace Cluckeys
                 return;
 
             _keyPressedCount = 0;
-            if (_holdSound != null && _holdSound.Status == SoundStatus.Playing)
-            {
-                _holdSound.Stop();
-            }
+            _holdSound?.Stop();
         }
 
         public void Start()
