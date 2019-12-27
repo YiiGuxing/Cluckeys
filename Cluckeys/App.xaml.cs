@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Windows;
+using System.Windows.Forms;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Cluckeys
 {
@@ -11,6 +13,7 @@ namespace Cluckeys
     {
         private bool _isFirstInstance;
         private Mutex? _singletonMutex;
+        private NotifyIcon? _icon;
 
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
@@ -20,6 +23,13 @@ namespace Cluckeys
                 Shutdown();
                 return;
             }
+
+            _icon = new NotifyIcon
+            {
+                Text = "Cluckeys",
+                Icon = Cluckeys.Resources.app,
+                Visible = true
+            };
 
             try
             {
@@ -42,6 +52,12 @@ namespace Cluckeys
         {
             if (!_isFirstInstance)
                 return;
+
+            if (_icon != null)
+            {
+                _icon.Visible = false;
+                _icon = null;
+            }
 
             try
             {
