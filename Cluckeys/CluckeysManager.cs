@@ -6,12 +6,13 @@ using SFML.Audio;
 
 namespace Cluckeys
 {
-    internal class CluckeysManager
+    internal class CluckeysManager : IDisposable
     {
         private const int VK_BACKSPACE = 8; // Backspace
         private const int VK_DELETE = 46; // Delete
 
         private bool _initialized;
+        private bool _running;
 
         private readonly KeyboardHook _keyboardHook;
 
@@ -24,11 +25,7 @@ namespace Cluckeys
         private readonly Dictionary<int, SoundBuffer> _sounds = new Dictionary<int, SoundBuffer>();
         private readonly Dictionary<int, SoundBuffer> _soundsIgnoreControlKey = new Dictionary<int, SoundBuffer>();
 
-        private delegate void Command();
-
-        private readonly Dictionary<int, Command> _commands = new Dictionary<int, Command>();
-
-        private bool IsEnabled { get; set; } = true;
+        public bool IsRunning => _running;
 
         internal static CluckeysManager Instance { get; }
 
@@ -45,9 +42,6 @@ namespace Cluckeys
                 OnKeyTypeEvent = OnKeyTypeEvent,
                 OnKeyUpEvent = OnKeyUpEvent
             };
-
-            // Windows + F12
-            _commands[KeyboardHook.WINDOWS_MASK | 123] = () => IsEnabled = !IsEnabled;
         }
 
         private void InitializeSounds()
@@ -195,11 +189,6 @@ namespace Cluckeys
         {
             _keyPressedCount++;
 
-            var isEnabled = IsEnabled;
-            _commands.GetValueOrDefault(e.code)?.Invoke();
-            if (!isEnabled && !IsEnabled)
-                return;
-
             var soundBuffer = _soundsIgnoreControlKey.GetValueOrDefault(e.vkCode) ??
                               _sounds.GetValueOrDefault(e.code) ??
                               _defaultSound;
@@ -213,9 +202,6 @@ namespace Cluckeys
 
         private void OnKeyTypeEvent(KeyboardHook.KeyboardEvent e)
         {
-            if (!IsEnabled)
-                return;
-
             var vkCode = e.vkCode;
             if (vkCode == VK_BACKSPACE || vkCode == VK_DELETE)
             {
@@ -243,21 +229,65 @@ namespace Cluckeys
 
         public void Start()
         {
+            if (_running)
+                return;
+
             InitializeSounds();
             _keyPressedCount = 0;
-            _keyboardHook.Start();
+            try
+            {
+                _keyboardHook.Start();
+                _running = true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                TrayIconManager.ShowNotification("", "Failed to enable Cluckeys.");
+            }
         }
 
         public void Stop()
         {
-            _keyboardHook.Stop();
+            if (!_running)
+                return;
+
+            try
+            {
+                _keyboardHook.Stop();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                TrayIconManager.ShowNotification("", "Failed to disable Cluckeys.");
+                return;
+            }
+
             _holdSound?.Stop();
             _keyPressedCount = 0;
+            _running = false;
         }
 
-        ~CluckeysManager()
+        public void Dispose()
         {
             Stop();
+            _soundPool.Dispose();
+            _holdSound?.Dispose();
+            _defaultSound?.Dispose();
+
+            foreach (var keyValuePair in _sounds)
+            {
+                keyValuePair.Value.Dispose();
+            }
+
+            foreach (var keyValuePair in _soundsIgnoreControlKey)
+            {
+                keyValuePair.Value.Dispose();
+            }
+
+            _sounds.Clear();
+            _soundsIgnoreControlKey.Clear();
+            _holdSound = null;
+            _initialized = false;
         }
 
         private class PooledSound : Sound
@@ -265,7 +295,7 @@ namespace Cluckeys
             internal long popTime;
         }
 
-        private class SoundPool
+        private class SoundPool : IDisposable
         {
             private readonly int _maxPoolSize;
             private readonly List<PooledSound> _pools;
@@ -320,6 +350,17 @@ namespace Cluckeys
 
                 sound.popTime = Environment.TickCount64;
                 return sound;
+            }
+
+            public void Dispose()
+            {
+                foreach (var pooledSound in _pools)
+                {
+                    pooledSound.Stop();
+                    pooledSound.Dispose();
+                }
+
+                _pools.Clear();
             }
         }
     }

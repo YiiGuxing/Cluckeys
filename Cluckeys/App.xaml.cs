@@ -1,8 +1,5 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Windows;
-using System.Windows.Forms;
-using MessageBox = System.Windows.MessageBox;
 
 namespace Cluckeys
 {
@@ -13,7 +10,6 @@ namespace Cluckeys
     {
         private bool _isFirstInstance;
         private Mutex? _singletonMutex;
-        private NotifyIcon? _icon;
 
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
@@ -24,23 +20,8 @@ namespace Cluckeys
                 return;
             }
 
-            _icon = new NotifyIcon
-            {
-                Text = "Cluckeys",
-                Icon = Cluckeys.Resources.app,
-                Visible = true
-            };
-
-            try
-            {
-                CluckeysManager.Instance.Start();
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-                ShowStoppedRunningMessage(exception.Message);
-                Shutdown();
-            }
+            TrayIconManager.Instance.ShowTrayIcon();
+            CluckeysManager.Instance.Start();
         }
 
         private void EnsureSingleton()
@@ -53,30 +34,9 @@ namespace Cluckeys
             if (!_isFirstInstance)
                 return;
 
-            if (_icon != null)
-            {
-                _icon.Visible = false;
-                _icon = null;
-            }
-
-            try
-            {
-                CluckeysManager.Instance.Stop();
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-                ShowStoppedRunningMessage(exception.Message);
-            }
-            finally
-            {
-                _singletonMutex?.ReleaseMutex();
-            }
-        }
-
-        private static void ShowStoppedRunningMessage(string message)
-        {
-            MessageBox.Show(message, "Cluckeys已停止运行", MessageBoxButton.OK, MessageBoxImage.Error);
+            _singletonMutex?.ReleaseMutex();
+            CluckeysManager.Instance.Dispose();
+            TrayIconManager.Instance.HideTrayIcon();
         }
     }
 }

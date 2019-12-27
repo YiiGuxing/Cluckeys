@@ -258,7 +258,7 @@ namespace Cluckeys
         public void Stop()
         {
             if (_keyboardHookHandle == 0) return;
-            if (UnhookWindowsHookEx(_keyboardHookHandle))
+            if (!UnhookWindowsHookEx(_keyboardHookHandle))
             {
                 throw new Exception($"Unable to unhook keyboard hook: {_keyboardHookHandle}");
             }
