@@ -17,19 +17,22 @@ namespace Cluckeys
         private TrayIconManager()
         {
             var contextMenu = new ContextMenuStrip();
-            contextMenu.Items.Add(new ToolStripLabel("Cluckeys") {Enabled = false});
+            contextMenu.Items.Add(new ToolStripLabel(Application.ProductName) {Enabled = false});
             contextMenu.Items.Add(new ToolStripSeparator());
+
+            contextMenu.Items.Add(new ToolStripMenuItem("Check for Updates...", null,
+                (sender, args) => Updater.CheckForUpdates(false)));
 
             AddEnabledMenuItem(contextMenu);
             AddRunAtStartupMenuItem(contextMenu);
 
             contextMenu.Items.Add(new ToolStripSeparator());
             contextMenu.Items.Add(new ToolStripMenuItem("Exit", null,
-                ((sender, args) => System.Windows.Application.Current.Shutdown())));
+                (sender, args) => System.Windows.Application.Current.Shutdown()));
 
             _notifyIcon = new NotifyIcon
             {
-                Text = @"Cluckeys",
+                Text = Application.ProductName,
                 Icon = Resources.app_16,
                 ContextMenuStrip = contextMenu
             };
@@ -84,6 +87,21 @@ namespace Cluckeys
         internal void HideTrayIcon()
         {
             _notifyIcon.Visible = false;
+        }
+
+        public static void ShowUpdatesAvailable(string version)
+        {
+            var contextMenu = Instance._notifyIcon.ContextMenuStrip;
+            contextMenu.Items.RemoveAt(2);
+
+            var updates = $"{Application.ProductName} {version} is now available!";
+            var content = $"{updates} Click here to open the download page.";
+            contextMenu.Items.Insert(2, new ToolStripMenuItem(updates, null,
+                (sender, args) => Updater.OpenReleasesPageUrl())
+            {
+                ToolTipText = content
+            });
+            ShowNotification("", content, timeout: 20000, clickEvent: Updater.OpenReleasesPageUrl);
         }
 
         public static void ShowNotification(string title, string content, bool isError = false, int timeout = 5000,

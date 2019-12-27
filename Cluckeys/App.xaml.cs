@@ -22,6 +22,7 @@ namespace Cluckeys
 
             TrayIconManager.Instance.ShowTrayIcon();
             CluckeysManager.Instance.Start();
+            Updater.CheckForUpdates();
         }
 
         private void EnsureSingleton()
