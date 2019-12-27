@@ -13,7 +13,7 @@ namespace Cluckeys
     {
         private static bool _isChecking;
 
-        private const string UpdateUrl = "https://api.github.com/repos/YiiGuxing/TranslationPlugin/releases/latest";
+        private const string UpdatesUrl = "https://api.github.com/repos/YiiGuxing/Cluckeys/releases/latest";
         private const string ReleasesPageUrl = "https://github.com/YiiGuxing/Cluckeys/releases/latest";
 
         public static void CheckForUpdates(bool silent = true)
@@ -27,7 +27,7 @@ namespace Cluckeys
             {
                 try
                 {
-                    var result = HttpRequest(UpdateUrl);
+                    var result = HttpRequest(UpdatesUrl);
                     var version = (string) result["tag_name"];
 
                     if (new Version(version.Substring(1)) <= Assembly.GetExecutingAssembly().GetName().Version)
