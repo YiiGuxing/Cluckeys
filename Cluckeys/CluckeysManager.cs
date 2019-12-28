@@ -311,41 +311,35 @@ namespace Cluckeys
                 _pools = new List<PooledSound>(Math.Min(maxPoolSize, 5));
             }
 
-            internal Sound GetSound()
+            private PooledSound? FindPooledSound()
             {
-                PooledSound? available = null;
-                PooledSound? oldest = null;
+                PooledSound? sound = null;
                 foreach (var pooledSound in _pools)
                 {
                     if (pooledSound.Status == SoundStatus.Stopped)
                     {
-                        available = pooledSound;
-                        break;
+                        return pooledSound;
                     }
 
-                    if (oldest == null || pooledSound.popTime < oldest.popTime)
+                    if (sound == null || pooledSound.popTime < sound.popTime)
                     {
-                        oldest = pooledSound;
+                        sound = pooledSound;
                     }
                 }
 
-                PooledSound sound;
-                if (available != null)
+                if (_pools.Count < _maxPoolSize)
+                    return null;
+
+                sound?.Stop();
+                return sound;
+            }
+
+            internal Sound GetSound()
+            {
+                var sound = FindPooledSound();
+                if (sound == null)
                 {
-                    sound = available;
-                }
-                else if (oldest == null || _pools.Count < _maxPoolSize)
-                {
-                    sound = new PooledSound();
-                    if (_pools.Count < _maxPoolSize)
-                    {
-                        _pools.Add(sound);
-                    }
-                }
-                else
-                {
-                    oldest.Stop();
-                    sound = oldest;
+                    _pools.Add(sound = new PooledSound());
                 }
 
                 sound.popTime = Environment.TickCount64;
