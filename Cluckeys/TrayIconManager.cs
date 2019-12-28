@@ -17,7 +17,8 @@ namespace Cluckeys
         private TrayIconManager()
         {
             var contextMenu = new ContextMenuStrip();
-            contextMenu.Items.Add(new ToolStripLabel(Application.ProductName) {Enabled = false});
+            contextMenu.Items.Add(new ToolStripLabel($"{Application.ProductName} v{Application.ProductVersion}")
+                {Enabled = false});
             contextMenu.Items.Add(new ToolStripSeparator());
 
             contextMenu.Items.Add(new ToolStripMenuItem("Check for Updates...", null,
