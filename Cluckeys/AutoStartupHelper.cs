@@ -7,7 +7,7 @@ namespace Cluckeys
 {
     internal static class AutoStartupHelper
     {
-        private static readonly string AppPath = Assembly.GetExecutingAssembly().Location;
+        private static readonly string AppPath = Path.ChangeExtension(Assembly.GetExecutingAssembly().Location, ".exe");
 
         private static readonly string StartupFullPath =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup),
