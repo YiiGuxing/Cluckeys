@@ -2,7 +2,7 @@
 <h1 align="center">Cluckeys</h1>
 <p align="center">Adds Switch's UI sounds to your keyboard presses.</p>
 
-# Keys available
+## Keys available
 
 - :white_check_mark: <kbd>All Keys</kbd>
 - :white_check_mark: <kbd>Ctrl</kbd> + <kbd>C</kbd>
@@ -14,6 +14,14 @@
 - :white_check_mark: <kbd>Shift</kbd> + <kbd>0-9</kbd>
 - :white_check_mark: <kbd>Windows</kbd> + <kbd>L</kbd>
 
+## Usage
+
+- Run `Cluckeys.exe`
+- ![screenshots](./screenshot.png)
+
+## Download
+
+Cluckeys can be downloaded from the [Cluckeys GitHub releases page](https://github.com/YiiGuxing/Cluckeys/releases/latest).
 
 # Acknowledgements
 
