@@ -5,6 +5,8 @@ namespace Cluckeys
 {
     internal class TrayIconManager
     {
+        private const string KeyUpdate = "UPDATE";
+
         private readonly NotifyIcon _notifyIcon;
 
         internal static TrayIconManager Instance { get; }
@@ -20,9 +22,8 @@ namespace Cluckeys
             contextMenu.Items.Add(new ToolStripLabel($"{Application.ProductName} v{Application.ProductVersion}")
                 {Enabled = false});
             contextMenu.Items.Add(new ToolStripSeparator());
-
             contextMenu.Items.Add(new ToolStripMenuItem("Check for Updates...", null,
-                (sender, args) => Updater.CheckForUpdates(false)));
+                (sender, args) => Updater.CheckForUpdates(false), KeyUpdate));
 
             AddEnabledMenuItem(contextMenu);
             AddRunAtStartupMenuItem(contextMenu);
@@ -34,7 +35,7 @@ namespace Cluckeys
             _notifyIcon = new NotifyIcon
             {
                 Text = Application.ProductName,
-                Icon = Resources.app_16,
+                Icon = Resources.app_notify,
                 ContextMenuStrip = contextMenu
             };
         }
@@ -92,16 +93,24 @@ namespace Cluckeys
 
         public static void ShowUpdatesAvailable(string version)
         {
-            var contextMenu = Instance._notifyIcon.ContextMenuStrip;
-            contextMenu.Items.RemoveAt(2);
+            var notifyIcon = Instance._notifyIcon;
+            notifyIcon.Icon = Resources.app_notify_new;
+
+            var items = notifyIcon.ContextMenuStrip.Items;
+            var index = items.IndexOfKey(KeyUpdate);
+            items.RemoveByKey(KeyUpdate);
 
             var updates = $"{Application.ProductName} {version} is now available!";
             var content = $"{updates} Click here to open the download page.";
-            contextMenu.Items.Insert(2, new ToolStripMenuItem(updates, null,
+            var toolStripLabel = new ToolStripLabel("", null, true,
                 (sender, args) => Updater.OpenReleasesPageUrl())
             {
+                AutoSize = true,
                 ToolTipText = content
-            });
+            };
+            items.Insert(index, toolStripLabel);
+            toolStripLabel.Text = updates; // 修复尺寸，初始化的时候设置会导致尺寸异常。
+
             ShowNotification("", content, timeout: 20000, clickEvent: Updater.OpenReleasesPageUrl);
         }
 

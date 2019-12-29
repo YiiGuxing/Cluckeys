@@ -73,9 +73,19 @@ namespace Cluckeys {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        public static System.Drawing.Icon app_16 {
+        public static System.Drawing.Icon app_notify {
             get {
-                object obj = ResourceManager.GetObject("app_16", resourceCulture);
+                object obj = ResourceManager.GetObject("app_notify", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        public static System.Drawing.Icon app_notify_new {
+            get {
+                object obj = ResourceManager.GetObject("app_notify_new", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }

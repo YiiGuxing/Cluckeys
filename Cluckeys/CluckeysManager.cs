@@ -12,7 +12,6 @@ namespace Cluckeys
         private const int VK_DELETE = 46; // Delete
 
         private bool _initialized;
-        private bool _running;
 
         private readonly KeyboardHook _keyboardHook;
 
@@ -25,7 +24,7 @@ namespace Cluckeys
         private readonly Dictionary<int, SoundBuffer> _sounds = new Dictionary<int, SoundBuffer>();
         private readonly Dictionary<int, SoundBuffer> _soundsIgnoreControlKey = new Dictionary<int, SoundBuffer>();
 
-        public bool IsRunning => _running;
+        public bool IsRunning { get; private set; }
 
         internal static CluckeysManager Instance { get; }
 
@@ -229,7 +228,7 @@ namespace Cluckeys
 
         public void Start()
         {
-            if (_running)
+            if (IsRunning)
                 return;
 
             InitializeSounds();
@@ -237,7 +236,7 @@ namespace Cluckeys
             try
             {
                 _keyboardHook.Start();
-                _running = true;
+                IsRunning = true;
             }
             catch (Exception e)
             {
@@ -248,7 +247,7 @@ namespace Cluckeys
 
         public void Stop()
         {
-            if (!_running)
+            if (!IsRunning)
                 return;
 
             try
@@ -264,7 +263,7 @@ namespace Cluckeys
 
             _holdSound?.Stop();
             _keyPressedCount = 0;
-            _running = false;
+            IsRunning = false;
         }
 
         public void Dispose()
