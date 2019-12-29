@@ -11,6 +11,8 @@ namespace Cluckeys
         private const int VK_BACKSPACE = 8; // Backspace
         private const int VK_DELETE = 46; // Delete
 
+        private const float DEFAULT_VOLUME = 70f;
+
         private bool _initialized;
 
         private readonly KeyboardHook _keyboardHook;
@@ -48,7 +50,11 @@ namespace Cluckeys
             if (_initialized) return;
 
             _defaultSound = new SoundBuffer(Resources.type);
-            _holdSound = new Sound(new SoundBuffer(Resources.hold)) {Loop = true};
+            _holdSound = new Sound(new SoundBuffer(Resources.hold))
+            {
+                Loop = true,
+                Volume = Math.Min(100f, DEFAULT_VOLUME * 1.5f)
+            };
 
             var shiftSound = new SoundBuffer(Resources.shift);
             _soundsIgnoreControlKey[KeyboardHook.VK_SHIFT_L] = shiftSound;
@@ -338,7 +344,10 @@ namespace Cluckeys
                 var sound = FindPooledSound();
                 if (sound == null)
                 {
-                    _pools.Add(sound = new PooledSound());
+                    _pools.Add(sound = new PooledSound
+                    {
+                        Volume = DEFAULT_VOLUME
+                    });
                 }
 
                 sound.popTime = Environment.TickCount64;
