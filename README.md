@@ -1,5 +1,5 @@
 <p align="center"><img src="./logo.png" alt="Cluckeys"></p>
-<h1 align="center">Cluckeys</h1>
+<h1 align="center">Cluckeys <a href="https://github.com/YiiGuxing/Cluckeys/releases/latest"><img src="https://img.shields.io/github/release/YiiGuxing/Cluckeys.svg?style=flat-square&colorB=08a3ff"></a></h1>
 <p align="center">Adds Switch's UI sounds to your keyboard presses.</p>
 
 ## Keys available
