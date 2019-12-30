@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Id="*"
+             Name="Cluckeys"
+             Language="1033"
+             Version="1.0.0"
+             Manufacturer="Yii.Guxing"
+             UpgradeCode="ba91e30d-1bfe-45e7-a42a-6514e79e5830">
+        <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Platform="x86"/>
+
+        <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed."/>
+        <MediaTemplate EmbedCab="yes"/>
+
+        <Property Id="WINDOWSBUILDNUMBER" Secure="yes">
+           <RegistrySearch Id="BuildNumberSearch" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion" Name="CurrentBuildNumber" Type="raw" />
+        </Property>
+        <Condition Message="This application is only supported on Windows 10 version 1803 (build 17134) or higher.">
+            <![CDATA[(WINDOWSBUILDNUMBER >= 17134)]]>
+        </Condition>
+
+        <Feature Id="ProductFeature" Title="Cluckeys" Level="1">
+            <ComponentGroupRef Id="ProductComponents"/>
+        </Feature>
+    </Product>
+
+    <Fragment>
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="ProgramFilesFolder">
+                <Directory Id="INSTALLFOLDER" Name="Cluckeys"/>
+            </Directory>
+            <Directory Id="ProgramMenuFolder"/>
+            <Directory Id="DesktopFolder" Name="Desktop"/>
+            <Directory Id="StartupFolder"/>
+        </Directory>
+    </Fragment>
+
+    <Fragment>
+        <DirectoryRef Id="INSTALLFOLDER" FileSource="publish\">
+            <Component Id="Cluckeys_exe" Guid="A61525BA-3DE1-44BD-A2A7-3E633C9DB621">
+                <File Id="Cluckeys.exe" KeyPath="yes" Checksum="yes"/>
+            </Component>
+            <Component Id="DLLs" Guid="BAE83323-133F-4C2B-A272-1A6DC7106FE0" KeyPath="yes">
+                <File Name="Cluckeys.dll"/>
+                <File Name="csfml-Audio.dll"/>
+                <File Name="csfml-Graphics.dll"/>
+                <File Name="csfml-System.dll"/>
+                <File Name="csfml-Window.dll"/>
+                <File Name="Newtonsoft.Json.dll"/>
+                <File Name="openal32.dll"/>
+                <File Name="SFML.Audio.dll"/>
+                <File Name="SFML.Graphics.dll"/>
+                <File Name="SFML.System.dll"/>
+                <File Name="SFML.Window.dll"/>
+            </Component>
+            <Component Id="OtherFiles" Guid="FC174BF9-9C84-4BBA-97E8-AD034CAE9A2B">
+                <File Name="Cluckeys.deps.json"/>
+                <File Name="Cluckeys.pdb"/>
+                <File Name="Cluckeys.runtimeconfig.json"/>
+            </Component>
+        </DirectoryRef>
+
+        <DirectoryRef Id="ProgramMenuFolder">
+            <Component Id="StartMenuShortcut" Guid="EA6288CE-3141-4FCC-BAD6-27C6C15E2015">
+                <Shortcut Id="AppStartMenuShortcut"
+                          Name="Cluckeys"
+                          Description="Cluckeys - Adds Switch's UI sounds to your keyboard presses"
+                          Target="[#Cluckeys.exe]"
+                          WorkingDirectory="INSTALLFOLDER"/>
+                <RemoveFile Id="CleanUpStartMenuShortcut" Directory="ProgramMenuFolder" Name="Cluckeys" On="uninstall"/>
+                <RegistryValue Root="HKCU" Key="Software\Cluckeys" Name="installed" Type="integer" Value="1"
+                               KeyPath="yes"/>
+            </Component>
+        </DirectoryRef>
+
+        <DirectoryRef Id="DesktopFolder">
+            <Component Id="DesktopShortcut" Guid="FFD97C67-C8CD-4F94-83F7-88B7A1E8545D">
+                <Shortcut Id="AppDesktopShortcut"
+                          Name="Cluckeys"
+                          Description="Cluckeys - Adds Switch's UI sounds to your keyboard presses"
+                          Target="[#Cluckeys.exe]"
+                          WorkingDirectory="INSTALLFOLDER"/>
+                <RemoveFile Id="CleanUpDesktopShortcut" Directory="DesktopFolder" Name="Cluckeys" On="uninstall"/>
+                <RegistryValue Root="HKCU" Key="Software\Cluckeys" Name="installed" Type="integer" Value="1"
+                               KeyPath="yes"/>
+            </Component>
+        </DirectoryRef>
+
+        <DirectoryRef Id="StartupFolder">
+            <Component Id="StartupShortcut" Guid="ECEEBE59-10B1-406B-8A89-8F444D22D890">
+                <Shortcut Id="AppStartupShortcut"
+                          Name="Cluckeys"
+                          Description="Cluckeys - Adds Switch's UI sounds to your keyboard presses"
+                          Target="[#Cluckeys.exe]"
+                          WorkingDirectory="INSTALLFOLDER"/>
+                <RemoveFile Id="CleanUpStartupShortcut" Directory="StartupFolder" Name="Cluckeys" On="uninstall"/>
+                <RegistryValue Root="HKCU" Key="Software\Cluckeys" Name="installed" Type="integer" Value="1"
+                               KeyPath="yes"/>
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+
+    <Fragment>
+        <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+            <ComponentRef Id="Cluckeys_exe"/>
+            <ComponentRef Id="DLLs"/>
+            <ComponentRef Id="OtherFiles"/>
+            <ComponentRef Id="StartMenuShortcut"/>
+            <ComponentRef Id="DesktopShortcut"/>
+            <ComponentRef Id="StartupShortcut"/>
+        </ComponentGroup>
+    </Fragment>
+</Wix>
