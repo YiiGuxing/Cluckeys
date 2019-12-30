@@ -16,12 +16,14 @@
 
 ## Usage
 
+- Download and install [.NET Core SDK](https://dotnet.microsoft.com/download)
 - Run `Cluckeys.exe`
 - ![screenshots](./screenshot.png)
 
 ## Download
 
 Cluckeys can be downloaded from the [Cluckeys GitHub releases page](https://github.com/YiiGuxing/Cluckeys/releases/latest).
+Click on `Assets` to show the files available in the release and then click on `CluckeysSetup.msi` to download the Cluckeys installer.
 
 # Acknowledgements
 
