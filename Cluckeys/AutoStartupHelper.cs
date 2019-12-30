@@ -11,7 +11,7 @@ namespace Cluckeys
 
         private static readonly string StartupFullPath =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup),
-                Path.ChangeExtension(Path.GetFileName(AppPath), ".lnk"));
+                Path.ChangeExtension(Path.GetFileName(AppPath), "lnk"));
 
         internal static bool CreateAutoRunShortcut()
         {

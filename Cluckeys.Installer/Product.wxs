@@ -84,19 +84,6 @@
                                KeyPath="yes"/>
             </Component>
         </DirectoryRef>
-
-        <DirectoryRef Id="StartupFolder">
-            <Component Id="StartupShortcut" Guid="ECEEBE59-10B1-406B-8A89-8F444D22D890">
-                <Shortcut Id="AppStartupShortcut"
-                          Name="Cluckeys"
-                          Description="Cluckeys - Adds Switch's UI sounds to your keyboard presses"
-                          Target="[#Cluckeys.exe]"
-                          WorkingDirectory="INSTALLFOLDER"/>
-                <RemoveFile Id="CleanUpStartupShortcut" Directory="StartupFolder" Name="Cluckeys" On="uninstall"/>
-                <RegistryValue Root="HKCU" Key="Software\Cluckeys" Name="installed" Type="integer" Value="1"
-                               KeyPath="yes"/>
-            </Component>
-        </DirectoryRef>
     </Fragment>
 
     <Fragment>
@@ -106,7 +93,6 @@
             <ComponentRef Id="OtherFiles"/>
             <ComponentRef Id="StartMenuShortcut"/>
             <ComponentRef Id="DesktopShortcut"/>
-            <ComponentRef Id="StartupShortcut"/>
         </ComponentGroup>
     </Fragment>
 </Wix>
