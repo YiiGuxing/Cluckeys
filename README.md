@@ -14,11 +14,15 @@
 - :white_check_mark: <kbd>Shift</kbd> + <kbd>0-9</kbd>
 - :white_check_mark: <kbd>Windows</kbd> + <kbd>L</kbd>
 
-## Usage
+## Installation
 
 - Download and install [.NET Core SDK](https://dotnet.microsoft.com/download)
-- Run `Cluckeys.exe`
-- ![screenshots](./screenshot.png)
+- Download and install `Cluckeys`
+- Run `Cluckeys`:
+
+  ![screenshots](./screenshot.png)
+
+***Note**: in order to run PowerToys, you'll need to be running at least Windows build 17134 or higher.*
 
 ## Download
 
