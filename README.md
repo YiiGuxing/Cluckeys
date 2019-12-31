@@ -22,7 +22,7 @@
 
   ![screenshots](./screenshot.png)
 
-***Note**: in order to run PowerToys, you'll need to be running at least Windows build 17134 or higher.*
+***Note**: in order to run Cluckeys, you'll need to be running at least Windows build 17134 or higher.*
 
 ## Download
 
