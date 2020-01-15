@@ -14,6 +14,10 @@
 - :white_check_mark: <kbd>Shift</kbd> + <kbd>0-9</kbd>
 - :white_check_mark: <kbd>Windows</kbd> + <kbd>L</kbd>
 
+## Shortcut
+
+- <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F12</kbd> : Enable/disable Cluckeys.
+
 ## Installation
 
 - Download and install [.NET Core SDK](https://dotnet.microsoft.com/download)
