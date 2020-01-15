@@ -12,7 +12,7 @@ namespace Cluckeys
     /// 
     /// Docs: https://docs.microsoft.com/zh-cn/windows/win32/api/winuser/
     /// </summary>
-    public class KeyboardHook
+    public class KeyboardHook : IDisposable
     {
         public const int VK_WINDOWS_L = 91; // Left Windows
         public const int VK_WINDOWS_R = 92; // Right Windows
@@ -50,23 +50,21 @@ namespace Cluckeys
 
         private readonly Dictionary<int, int> _eventDict = new Dictionary<int, int>();
 
-        private OnKeyEvent? _onKeyDownEvent;
-        private OnKeyEvent? _onKeyTypeEvent;
-        private OnKeyEvent? _onKeyUpEvent;
+        internal event OnKeyEvent KeyDown;
+        internal event OnKeyEvent KeyType;
+        internal event OnKeyEvent KeyUp;
 
-        public OnKeyEvent OnKeyDownEvent
+
+        internal static KeyboardHook Instance { get; }
+
+        static KeyboardHook()
         {
-            set => _onKeyDownEvent = value;
+            Instance = new KeyboardHook();
         }
 
-        public OnKeyEvent OnKeyTypeEvent
+        protected KeyboardHook()
         {
-            set => _onKeyTypeEvent = value;
-        }
-
-        public OnKeyEvent OnKeyUpEvent
-        {
-            set => _onKeyUpEvent = value;
+            Hook();
         }
 
         public delegate void OnKeyEvent(KeyboardEvent e);
@@ -126,7 +124,7 @@ namespace Cluckeys
         [DllImport("kernel32.dll")]
         private static extern IntPtr GetModuleHandle(string name);
 
-        public void Start()
+        private void Hook()
         {
             if (_keyboardHookHandle != 0) return;
 
@@ -140,7 +138,7 @@ namespace Cluckeys
 
             if (_keyboardHookHandle == 0)
             {
-                throw new Exception("Keyboard hook installation failed");
+                Console.WriteLine(@"Keyboard hook installation failed");
             }
         }
 
@@ -167,11 +165,11 @@ namespace Cluckeys
                         if (count == 1)
                         {
                             AddModifier(vkCode);
-                            _onKeyDownEvent?.Invoke(keyboardEvent);
+                            KeyDown?.Invoke(keyboardEvent);
                         }
                         else
                         {
-                            _onKeyTypeEvent?.Invoke(keyboardEvent);
+                            KeyType?.Invoke(keyboardEvent);
                         }
 
                         // 锁定Windows以后就收不到事件了
@@ -180,7 +178,7 @@ namespace Cluckeys
                             foreach (var (_vkCode, _) in _eventDict)
                             {
                                 RemoveModifier(_vkCode);
-                                _onKeyUpEvent?.Invoke(new KeyboardEvent(_vkCode, _modifiers));
+                                KeyUp?.Invoke(new KeyboardEvent(_vkCode, _modifiers));
                             }
 
                             _eventDict.Clear();
@@ -199,7 +197,7 @@ namespace Cluckeys
 
                         RemoveModifier(vkCode);
                         _eventDict.Remove(vkCode);
-                        _onKeyUpEvent?.Invoke(keyboardEvent);
+                        KeyUp?.Invoke(keyboardEvent);
                         break;
                 }
             }
@@ -255,12 +253,12 @@ namespace Cluckeys
             }
         }
 
-        public void Stop()
+        private void Unhook()
         {
             if (_keyboardHookHandle == 0) return;
             if (!UnhookWindowsHookEx(_keyboardHookHandle))
             {
-                throw new Exception($"Unable to unhook keyboard hook: {_keyboardHookHandle}");
+                Console.WriteLine($@"Unable to unhook keyboard hook: {_keyboardHookHandle}");
             }
 
             _modifiers = 0;
@@ -268,9 +266,10 @@ namespace Cluckeys
             _keyboardHookHandle = 0;
         }
 
-        ~KeyboardHook()
+        public void Dispose()
         {
-            Stop();
+            Unhook();
+            GC.SuppressFinalize(this);
         }
 
         [StructLayout(LayoutKind.Sequential)]

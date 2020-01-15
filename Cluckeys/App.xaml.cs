@@ -21,6 +21,7 @@ namespace Cluckeys
             }
 
             TrayIconManager.Instance.ShowTrayIcon();
+            ShortcutManager.Instance.Setup();
             CluckeysManager.Instance.Start();
             Updater.CheckForUpdates();
         }
@@ -36,7 +37,9 @@ namespace Cluckeys
                 return;
 
             _singletonMutex?.ReleaseMutex();
+            ShortcutManager.Instance.Dispose();
             CluckeysManager.Instance.Dispose();
+            KeyboardHook.Instance.Dispose();
             TrayIconManager.Instance.HideTrayIcon();
         }
     }

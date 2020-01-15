@@ -15,8 +15,6 @@ namespace Cluckeys
 
         private bool _initialized;
 
-        private readonly KeyboardHook _keyboardHook;
-
         private int _keyPressedCount;
 
         private Sound? _holdSound;
@@ -37,12 +35,6 @@ namespace Cluckeys
 
         private CluckeysManager()
         {
-            _keyboardHook = new KeyboardHook
-            {
-                OnKeyDownEvent = OnKeyDownEvent,
-                OnKeyTypeEvent = OnKeyTypeEvent,
-                OnKeyUpEvent = OnKeyUpEvent
-            };
         }
 
         private void InitializeSounds()
@@ -192,6 +184,9 @@ namespace Cluckeys
 
         private void OnKeyDownEvent(KeyboardHook.KeyboardEvent e)
         {
+            if (!IsRunning)
+                return;
+
             _keyPressedCount++;
 
             var soundBuffer = _soundsIgnoreControlKey.GetValueOrDefault(e.vkCode) ??
@@ -207,6 +202,9 @@ namespace Cluckeys
 
         private void OnKeyTypeEvent(KeyboardHook.KeyboardEvent e)
         {
+            if (!IsRunning || _keyPressedCount <= 0)
+                return;
+
             var vkCode = e.vkCode;
             if (vkCode == VK_BACKSPACE || vkCode == VK_DELETE)
             {
@@ -224,6 +222,9 @@ namespace Cluckeys
 
         private void OnKeyUpEvent(KeyboardHook.KeyboardEvent e)
         {
+            if (!IsRunning)
+                return;
+
             _keyPressedCount--;
             if (_keyPressedCount > 0)
                 return;
@@ -237,18 +238,13 @@ namespace Cluckeys
             if (IsRunning)
                 return;
 
+            KeyboardHook.Instance.KeyDown += OnKeyDownEvent;
+            KeyboardHook.Instance.KeyType += OnKeyTypeEvent;
+            KeyboardHook.Instance.KeyUp += OnKeyUpEvent;
+
             InitializeSounds();
+            IsRunning = true;
             _keyPressedCount = 0;
-            try
-            {
-                _keyboardHook.Start();
-                IsRunning = true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                TrayIconManager.ShowNotification("", "Failed to enable Cluckeys.");
-            }
         }
 
         public void Stop()
@@ -256,18 +252,12 @@ namespace Cluckeys
             if (!IsRunning)
                 return;
 
-            try
-            {
-                _keyboardHook.Stop();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                TrayIconManager.ShowNotification("", "Failed to disable Cluckeys.");
-                return;
-            }
 
             _holdSound?.Stop();
+            KeyboardHook.Instance.KeyDown -= OnKeyDownEvent;
+            KeyboardHook.Instance.KeyType -= OnKeyTypeEvent;
+            KeyboardHook.Instance.KeyUp -= OnKeyUpEvent;
+
             _keyPressedCount = 0;
             IsRunning = false;
         }
@@ -293,6 +283,7 @@ namespace Cluckeys
             _soundsIgnoreControlKey.Clear();
             _holdSound = null;
             _initialized = false;
+            GC.SuppressFinalize(this);
         }
 
         private class PooledSound : Sound

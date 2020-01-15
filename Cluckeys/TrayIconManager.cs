@@ -42,7 +42,7 @@ namespace Cluckeys
 
         private static void AddEnabledMenuItem(ToolStripDropDown toolStrip)
         {
-            var enabledMenuItem = new ToolStripMenuItem("Enabled", null, (sender, args) =>
+            var enabledMenuItem = new ToolStripMenuItem("Enabled (Ctrl+Shift+F12)", null, (sender, args) =>
             {
                 if (sender == null) return;
                 var menuItem = (ToolStripMenuItem) sender;
