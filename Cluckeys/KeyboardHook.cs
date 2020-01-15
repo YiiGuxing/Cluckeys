@@ -50,9 +50,9 @@ namespace Cluckeys
 
         private readonly Dictionary<int, int> _eventDict = new Dictionary<int, int>();
 
-        internal event OnKeyEvent KeyDown;
-        internal event OnKeyEvent KeyType;
-        internal event OnKeyEvent KeyUp;
+        internal event OnKeyEvent? KeyDown;
+        internal event OnKeyEvent? KeyType;
+        internal event OnKeyEvent? KeyUp;
 
 
         internal static KeyboardHook Instance { get; }
