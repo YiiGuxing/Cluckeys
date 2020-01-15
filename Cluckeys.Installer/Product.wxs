@@ -3,7 +3,7 @@
     <Product Id="*"
              Name="Cluckeys"
              Language="1033"
-             Version="1.0.0"
+             Version="1.0.1"
              Manufacturer="Yii.Guxing"
              UpgradeCode="ba91e30d-1bfe-45e7-a42a-6514e79e5830">
         <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Platform="x86"/>
