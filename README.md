@@ -20,7 +20,7 @@
 
 ## Installation
 
-- Download and install [.NET Core SDK](https://dotnet.microsoft.com/download)
+- Download and install [.NET Core Runtime](https://dotnet.microsoft.com/download)
 - Download and install `Cluckeys`
 - Run `Cluckeys`:
 
